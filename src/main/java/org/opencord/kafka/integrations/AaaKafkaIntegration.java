@@ -62,14 +62,12 @@ public class AaaKafkaIntegration {
             unbind = "unbindAuthenticationService")
     protected AuthenticationService authenticationService;
     
-    //adding cardinality reference for authenticationMetrix
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
             bind = "bindAuthenticationStatService",
             unbind = "unbindAuthenticationStatService")
     protected AuthenticationStatisticsService authenticationStatisticsService;
 
     private final AuthenticationEventListener listener = new InternalAuthenticationListener();
-    //making object of authenticationStatisticsEventListener
     private final AuthenticationStatisticsEventListener authenticationStatisticsEventListener = new InternalAuthenticationStatisticsListner();
     
 
@@ -80,8 +78,6 @@ public class AaaKafkaIntegration {
     private static final String PORT_NUMBER = "portNumber";
     private static final String SERIAL_NUMBER = "serialNumber";
     private static final String AUTHENTICATION_STATE = "authenticationState";
-    
- //adding topic of authenticationMetrix and its attributes
     
     private static final String AUTHENTICATION_STATISTICS_TOPIC = "authstats.kpis";
     private static final String AUTHENTICATION_STATISTICS_STATE = "authenticationStatisticsState";
@@ -96,11 +92,6 @@ public class AaaKafkaIntegration {
     private static final String MALFORMED_PACKET_COUNTERS = "malformed_packet_counter";
     private static final String NUMBER_OF_PACKET_FROM_UNKNOWN_SERVER = "numberOfPacketFromUnknownServer";
     private static final String PACKET_ROUND_TRIP_TIME_IN_MILLS = "packetRoundtripTimeInMilis";
-    
-
-    
-    
-    
 
     protected void bindAuthenticationService(AuthenticationService authenticationService) {
         if (this.authenticationService == null) {
@@ -125,7 +116,6 @@ public class AaaKafkaIntegration {
     }
     
     
-    //binding and unbinding authstatservice
     protected void bindAuthenticationStatService(AuthenticationStatisticsService authenticationStatisticsService) {
         if (this.authenticationStatisticsService == null) {
             log.info("Binding AuthenticationStastService");
@@ -164,7 +154,6 @@ public class AaaKafkaIntegration {
         eventBusService.send(TOPIC, serialize(event));
     }
     
-    //handler for AuthenticationStat 
     private void handleStat(AuthenticationStatisticsEvent event) {
         eventBusService.send(AUTHENTICATION_STATISTICS_TOPIC, serializeStat(event));
     }
@@ -183,33 +172,20 @@ public class AaaKafkaIntegration {
         return authEvent;
     }
 
- // Creating Json node for AuthenticationStatistics
     private JsonNode serializeStat(AuthenticationStatisticsEvent event) {
-    	log.info("------inside AaaKafkaIntergation.serializeStat------");
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode authMetricsEvent = mapper.createObjectNode();
         authMetricsEvent.put(TIMESTAMP, Instant.now().toString());
-        log.info("ACCEPT_PACKET_COUNTER---"+event.subject().getAccept_packets_counter());
-        authMetricsEvent.put(ACCEPT_PACKET_COUNTER, event.subject().getAccept_packets_counter());
-        log.info("REJECT_PACKET_COUNTER---"+event.subject().getReject_packets_counter());
-        authMetricsEvent.put(REJECT_PACKET_COUNTER, event.subject().getReject_packets_counter());
-        log.info("CHALLENGE_PACKET_COUNTER---"+event.subject().getChallenege_packets_counter());
-        authMetricsEvent.put(CHALLENGE_PACKET_COUNTER, event.subject().getChallenege_packets_counter());
-        log.info("ACCESS_PACKET_COUNTER---"+event.subject().getAccess_packets_counter());
-        authMetricsEvent.put(ACCESS_PACKET_COUNTER, event.subject().getAccess_packets_counter());
-        log.info("INVALID_VALIDATOR_COUNTER---"+event.subject().getInvalid_validator_counter());
-        authMetricsEvent.put(INVALID_VALIDATOR_COUNTER, event.subject().getInvalid_validator_counter());
-        log.info("UNKNOWN_TYPE_COUNTER---"+event.subject().getUnknown_packet_counter());
-        authMetricsEvent.put(UNKNOWN_TYPE_COUNTER, event.subject().getUnknown_packet_counter());
-        log.info("PENDING_REQUEST_COUNTER---"+event.subject().getPending_request_counter());
-        authMetricsEvent.put(PENDING_REQUEST_COUNTER, event.subject().getPending_request_counter());
-        log.info("NUMBER_OF_DROPPED_PACKETS---"+event.subject().getNumberOfDroppedPackets());
+        authMetricsEvent.put(ACCEPT_PACKET_COUNTER, event.subject().getAcceptPacketsCounter());
+        authMetricsEvent.put(REJECT_PACKET_COUNTER, event.subject().getRejectPacketsCounter());
+        authMetricsEvent.put(CHALLENGE_PACKET_COUNTER, event.subject().getChallenegePacketsCounter());
+        authMetricsEvent.put(ACCESS_PACKET_COUNTER, event.subject().getAccessPacketsCounter());
+        authMetricsEvent.put(INVALID_VALIDATOR_COUNTER, event.subject().getInvalidValidatorCounter());
+        authMetricsEvent.put(UNKNOWN_TYPE_COUNTER, event.subject().getUnknowPacketCounter());
+        authMetricsEvent.put(PENDING_REQUEST_COUNTER, event.subject().getPendingRequestCounter());
         authMetricsEvent.put(NUMBER_OF_DROPPED_PACKETS, event.subject().getNumberOfDroppedPackets());
-        log.info("MALFORMED_PACKET_COUNTERS---"+event.subject().getMalformed_packet_counter());
-        authMetricsEvent.put(MALFORMED_PACKET_COUNTERS, event.subject().getMalformed_packet_counter());
-        log.info("NUMBER_OF_PACKET_FROM_UNKNOWN_SERVER---"+event.subject().getNumberOfPacketFromUnknownServer());
+        authMetricsEvent.put(MALFORMED_PACKET_COUNTERS, event.subject().getMalformedPacketCounter());
         authMetricsEvent.put(NUMBER_OF_PACKET_FROM_UNKNOWN_SERVER, event.subject().getNumberOfPacketFromUnknownServer());
-        log.info("PACKET_ROUND_TRIP_TIME_IN_MILLS---"+event.subject().getPacketRoundtripTimeInMilis());
         authMetricsEvent.put(PACKET_ROUND_TRIP_TIME_IN_MILLS, event.subject().getPacketRoundtripTimeInMilis());
         authMetricsEvent.put(AUTHENTICATION_STATISTICS_STATE, event.type().toString());
         return authMetricsEvent;
@@ -223,7 +199,6 @@ public class AaaKafkaIntegration {
             handle(authenticationEvent);
         }
     }
- //adding new class for InternalAuthenticationStatisticsListner
     
     private class InternalAuthenticationStatisticsListner implements
     AuthenticationStatisticsEventListener {
